@@ -125,7 +125,6 @@ h1,h2{margin: 0 0 12px 0}
 #profile{display:none; margin-top:12px; padding:12px; border:1px dashed #ccc; border-radius:6px;background:#fafafa}
 #profile summary{cursor:pointer;font-weight:600}
 
-
 + .compliance-badge {
 +   display: inline-block;
 +   padding: 2px 6px;
@@ -141,6 +140,10 @@ h1,h2{margin: 0 0 12px 0}
 + .badge-pci { background-color: #ffd93d; color: #333; }
 + .badge-attack { background-color: #ff9ff3; color: white; }
 + /* END: Added for Compliance Badges (Issue #88) */
+
+
+
+
 
 @media (max-width: 768px) {
   .header{flex-direction:column;align-items:flex-start;gap:12px}
@@ -326,6 +329,34 @@ function escapeHtml(str){
   return (str||'').replace(/[&<>"']/g, m => map[m]);
 }
 
++ function renderComplianceBadges(f) {
++   if (!f.compliance) return '';
++   let badgesHtml = '';
++ 
++   // Map field names (from code) to CSS class and prefix (from issue)
++   const frameworkMap = {
++     'owasp_top_10_2021': { class: 'badge-owasp', prefix: 'OWASP ' },
++     'cwe_top_25_2024':   { class: 'badge-cwe', prefix: 'CWE ' },
++     'cis_controls_v8_1': { class: 'badge-cis', prefix: 'CIS ' },
++     'nist_csf_2_0':    { class: 'badge-nist', prefix: 'NIST ' },
++     'pci_dss_4_0':     { class: 'badge-pci', prefix: 'PCI ' },
++     'mitre_attack_v16_1': { class: 'badge-attack', prefix: 'ATT&CK ' }
++   };
++ 
++   for (const field in frameworkMap) {
++     if (f.compliance[field] && f.compliance[field].length > 0) {
++       const config = frameworkMap[field];
++       f.compliance[field].forEach(item => {
++         badgesHtml += `<span class="compliance-badge ${config.class}">${escapeHtml(config.prefix + item)}</span>`;
++       });
++     }
++   }
++   
++   // Wrap badges in a div if they exist
++   return badgesHtml ? `<div style="margin-top:4px;">${badgesHtml}</div>` : '';
+
+]
+
 function severityRank(s){
   const i = SEV_ORDER.indexOf(s||'');
   return i === -1 ? SEV_ORDER.length : i;
@@ -370,39 +401,11 @@ function matchesFilter(f){
   return true;
 }
 
-// ... existing <script> content ...
+
   return (str||'').replace(/[&<>"']/g, m => map[m]);
 }
 
-+ function renderComplianceBadges(f) {
-+   if (!f.compliance) return '';
-+   let badgesHtml = '';
-+ 
-+   // Map field names (from code) to CSS class and prefix (from issue)
-+   const frameworkMap = {
-+     'owasp_top_10_2021': { class: 'badge-owasp', prefix: 'OWASP ' },
-+     'cwe_top_25_2024':   { class: 'badge-cwe', prefix: 'CWE ' },
-+     'cis_controls_v8_1': { class: 'badge-cis', prefix: 'CIS ' },
-+     'nist_csf_2_0':    { class: 'badge-nist', prefix: 'NIST ' },
-+     'pci_dss_4_0':     { class: 'badge-pci', prefix: 'PCI ' },
-+     'mitre_attack_v16_1': { class: 'badge-attack', prefix: 'ATT&CK ' }
-+   };
-+ 
-+   for (const field in frameworkMap) {
-+     if (f.compliance[field] && f.compliance[field].length > 0) {
-+       const config = frameworkMap[field];
-+       f.compliance[field].forEach(item => {
-+         badgesHtml += `<span class="compliance-badge ${config.class}">${escapeHtml(config.prefix + item)}</span>`;
-+       });
-+     }
-+   }
-+   
-+   // Wrap badges in a div if they exist
-+   return badgesHtml ? `<div style="margin-top:4px;">${badgesHtml}</div>` : '';
 
-
-function severityRank(s){
-// ... rest of script ...
 
 function filtered(){
   return data.filter(matchesFilter);
